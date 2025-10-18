@@ -52,7 +52,7 @@ export default function GuidelinesList({
           const hasViolations = violationData.counts[guideline.id] > 0;
 
           const tooltipContent = hasViolations ? (
-            <div className="space-y-2 max-w-sm">
+            <div className="py-3 px-1 max-w-sm">
               {guidelineViolations.map((v, idx) => (
                 <div key={idx} className="text-xs">
                   <p className="font-medium">Reason:</p>
@@ -109,7 +109,7 @@ export default function GuidelinesList({
                 </div>
 
                 {hasViolations && (
-                  <span className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full shrink-0">
+                  <span className="bg-amber-400 text-amber-foreground text-xs px-2 py-0.5 rounded-full shrink-0">
                     {violationData.counts[guideline.id]}
                   </span>
                 )}

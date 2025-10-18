@@ -83,7 +83,7 @@ export default function ChecklistList({
               <Tooltip key={item.id}>
                 <TooltipTrigger asChild>{itemElement}</TooltipTrigger>
                 <TooltipContent side="left" className="max-w-md">
-                  <div className="text-xs">
+                  <div className="py-3 px-1 text-xs">
                     <p className="font-medium">Why this is unchecked:</p>
                     <p className="text-muted-foreground mt-1">{reason}</p>
                   </div>
