@@ -33,16 +33,16 @@ export default function Home(): React.JSX.Element {
   }, [pageContent]);
 
   return (
-    <div className="grid grid-cols-3 h-screen">
+    <div className="grid grid-cols-9 h-screen">
       {/* Left column - 1 unit */}
-      <div className="col-span-1 flex flex-col">
+      <div className="col-span-2 flex flex-col">
         <div className="flex-1">
           <SuggestionsSection />
         </div>
       </div>
 
       {/* Center column - 1 unit */}
-      <div className="col-span-1 relative h-screen">
+      <div className="col-span-4 relative h-screen">
         <TextEditorSection
           content={pageContent}
           onContentChange={setPageContent}
@@ -53,7 +53,7 @@ export default function Home(): React.JSX.Element {
       </div>
 
       {/* Right column - 1 unit with full-page tabs */}
-      <div className="col-span-1 flex flex-col min-h-0">
+      <div className="col-span-3 flex flex-col min-h-0">
         <Tabs defaultValue="guidelines" className="flex flex-col h-full">
           <div className="shrink-0 border-b border-l border-border px-4">
             <TabsList className="h-12 w-full justify-start">
