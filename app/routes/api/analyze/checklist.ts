@@ -1,14 +1,15 @@
 import { type ActionFunctionArgs } from "react-router";
 import OpenAI from "openai";
 import * as v from "valibot";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { ChecklistAnalysisResultSchema } from "~/model/checklist";
-import { parseChecklist } from "~/lib/parse-checklist";
+import {
+  ChecklistAnalysisResultSchema,
+  ChecklistItemSchema,
+} from "~/model/checklist";
 
-// Schema for request body validation - only text is needed
+// Schema for request body validation
 const AnalyzeRequestSchema = v.object({
   text: v.pipe(v.string(), v.minLength(1)),
+  checklistItems: v.array(ChecklistItemSchema),
 });
 
 // Schema for OpenAI response validation
@@ -38,12 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    const { text } = requestResult.output;
-
-    // Read checklist from local file
-    const checklistPath = join(process.cwd(), "app", "data", "checklist.md");
-    const checklistMarkdown = await readFile(checklistPath, "utf-8");
-    const checklistItems = parseChecklist(checklistMarkdown);
+    const { text, checklistItems } = requestResult.output;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {

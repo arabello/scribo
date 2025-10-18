@@ -1,14 +1,12 @@
 import { type ActionFunctionArgs } from "react-router";
 import OpenAI from "openai";
 import * as v from "valibot";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { AnalysisResultSchema } from "~/model/guideline";
-import { parseGuidelines } from "~/lib/parse-guidelines";
+import { AnalysisResultSchema, GuidelineSchema } from "~/model/guideline";
 
-// Schema for request body validation - only text is needed
+// Schema for request body validation
 const AnalyzeRequestSchema = v.object({
   text: v.pipe(v.string(), v.minLength(1)),
+  guidelines: v.array(GuidelineSchema),
 });
 
 // Schema for OpenAI response validation
@@ -38,12 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    const { text } = requestResult.output;
-
-    // Read guidelines from local file
-    const guidelinesPath = join(process.cwd(), "app", "data", "guidelines.md");
-    const guidelinesMarkdown = await readFile(guidelinesPath, "utf-8");
-    const guidelines = parseGuidelines(guidelinesMarkdown);
+    const { text, guidelines } = requestResult.output;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {

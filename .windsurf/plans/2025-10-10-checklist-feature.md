@@ -7,6 +7,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 ## Current State Analysis
 
 ### What Exists:
+
 - **Placeholder component**: `app/components/checklist-section.tsx` (13 lines, empty shell)
 - **Checklist data**: `app/data/checklist.md` (21 lines, markdown checkbox format)
 - **UI layout**: Already integrated in `app/routes/home.tsx` (line 131-133)
@@ -39,15 +40,18 @@ Implementing a checklist analysis feature that evaluates blog post content again
    - Effects handle auto-loading cached results
 
 ### Checklist Data Format:
+
 ```markdown
 - [ ] Validate the post objectives...
 - [ ] Use the assigned database page...
 ```
+
 19 total checklist items in markdown checkbox format `- [ ] text`
 
 ## Desired End State
 
 ### Functional Requirements:
+
 1. Parse checklist.md into structured data model
 2. POST to `/api/analyze/checklist` with text content
 3. LLM evaluates each item as pass/fail
@@ -56,6 +60,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 6. Checked items have no additional information
 
 ### Verification Criteria:
+
 - [x] All 17 checklist items render in UI
 - [x] Analyze button triggers checklist analysis
 - [x] LLM correctly evaluates items against text
@@ -76,13 +81,17 @@ Implementing a checklist analysis feature that evaluates blog post content again
 ## Implementation Phases
 
 ### Phase 1: Data Model & Schema ✓
+
 **Files to create/modify:**
+
 - ✓ Create `app/model/checklist.ts`
 - ✓ Create `app/lib/parse-checklist.ts`
 - ✓ Create `app/data/checklist.ts`
 
 **Tasks:**
+
 1. Define `ChecklistItemSchema` with Valibot:
+
    ```typescript
    {
      id: number,
@@ -91,6 +100,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
    ```
 
 2. Define `ChecklistResultSchema`:
+
    ```typescript
    {
      id: number,
@@ -100,6 +110,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
    ```
 
 3. Define `ChecklistAnalysisResultSchema`:
+
    ```typescript
    {
      results: ChecklistResult[],
@@ -118,11 +129,14 @@ Implementing a checklist analysis feature that evaluates blog post content again
 6. Export parsed checklist items from `app/data/checklist.ts`
 
 ### Phase 2: Backend API Endpoint ✓
+
 **Files to create:**
+
 - ✓ Create `app/routes/api/analyze/checklist.ts`
 - ✓ Register route in `app/routes.ts`
 
 **Tasks:**
+
 1. Import OpenAI, Valibot, checklist data
 2. Create request validation schema (text only)
 3. Create OpenAI response validation schema
@@ -131,15 +145,17 @@ Implementing a checklist analysis feature that evaluates blog post content again
    - Check for OPENAI_API_KEY
    - Format checklist items for prompt
    - Call OpenAI with specific instructions:
+
      ```
      System: You are a blog post reviewer. Evaluate if the text addresses each checklist item.
      For each item:
      - id: number
      - checked: boolean
      - reason: string (only if checked is false)
-     
+
      Return JSON with results array.
      ```
+
    - Parse and validate OpenAI response
    - Create and validate final result
    - Return JSON response
@@ -148,14 +164,17 @@ Implementing a checklist analysis feature that evaluates blog post content again
 
 6. Register route in `app/routes.ts`:
    ```typescript
-   route("api/analyze/checklist", "routes/api/analyze/checklist.ts")
+   route("api/analyze/checklist", "routes/api/analyze/checklist.ts");
    ```
 
 ### Phase 3: Analysis Service Extension ✓
+
 **Files to modify:**
+
 - ✓ Modify `app/service/analysis-service.ts`
 
 **Tasks:**
+
 1. Import `ChecklistAnalysisResultSchema` and types
 2. Add `analyzeChecklist(text: string)` function:
    - POST to `/api/analyze/checklist`
@@ -175,11 +194,15 @@ Implementing a checklist analysis feature that evaluates blog post content again
    - Return result or null
 
 ### Phase 4: Frontend State Integration ✓
+
 **Files to modify:**
+
 - ✓ Modify `app/routes/home.tsx`
 
 **Tasks:**
+
 1. Add checklist state to component:
+
    ```typescript
    interface ChecklistAnalysisState {
      isAnalyzing: boolean;
@@ -189,6 +212,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
    ```
 
 2. Add state variable:
+
    ```typescript
    const [checklistState, setChecklistState] = useState<ChecklistAnalysisState>({...})
    ```
@@ -196,22 +220,27 @@ Implementing a checklist analysis feature that evaluates blog post content again
 3. Add effect to load cached checklist analysis when text changes
 
 4. Modify `handleAnalyze` to analyze both guidelines and checklist:
+
    ```typescript
    const handleAnalyze = async () => {
      // Set both analyzing states
      // Call analyzeText and analyzeChecklist in parallel
      // Update both states with results
-   }
+   };
    ```
 
 5. Pass checklist props to ChecklistSection component
 
 ### Phase 5: Checklist UI Component ✓
+
 **Files to modify:**
+
 - ✓ Modify `app/components/checklist-section.tsx`
 
 **Tasks:**
+
 1. Define component props:
+
    ```typescript
    {
      isAnalyzing: boolean,
@@ -244,6 +273,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 ## Technical Considerations
 
 ### Valibot Validation Strategy:
+
 - All external data validated at boundaries
 - Request validation before processing
 - OpenAI response validation before use
@@ -251,6 +281,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 - Use `v.safeParse` for graceful error handling
 
 ### LLM Prompt Design:
+
 - Clear system role definition
 - Explicit output format specification
 - JSON response format enforcement
@@ -259,18 +290,21 @@ Implementing a checklist analysis feature that evaluates blog post content again
 - Request only ID, checked boolean, and reason for failures
 
 ### Performance:
+
 - Parse checklist at build time (not runtime)
 - Cache analysis results by text hash
 - Parallel API calls for guidelines and checklist
 - Memoize results lookups in component
 
 ### Error Handling:
+
 - Network failures → error state with message
 - Invalid API responses → logged and user-friendly error
 - Missing API key → clear error message
 - Validation failures → detailed console logging
 
 ### UI/UX:
+
 - Consistent with guidelines section design
 - Clear visual distinction between checked/unchecked
 - Tooltips only for unchecked items
@@ -288,6 +322,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 ## Testing Strategy
 
 ### Manual Testing:
+
 1. Empty text → no checklist analysis
 2. Short text → some items unchecked
 3. Comprehensive text → most items checked
@@ -297,6 +332,7 @@ Implementing a checklist analysis feature that evaluates blog post content again
 7. Click analyze → both analyses run
 
 ### Edge Cases:
+
 - API failure handling
 - Invalid OpenAI responses
 - Corrupted localStorage data
@@ -310,6 +346,7 @@ No migration needed - this is a new feature. Existing functionality unaffected.
 ## Dependencies
 
 All dependencies already in project:
+
 - `openai` - LLM API calls
 - `valibot` - Schema validation
 - `components/ui/tooltip` - Tooltip UI (via shadcn/ui)
@@ -336,18 +373,21 @@ All dependencies already in project:
 All 5 phases successfully implemented and verified:
 
 ### Files Created:
+
 - `app/model/checklist.ts` - Valibot schemas and TypeScript types
 - `app/lib/parse-checklist.ts` - Markdown parser for checklist items
 - `app/data/checklist.ts` - Exported parsed checklist items (17 items)
 - `app/routes/api/analyze/checklist.ts` - API endpoint for LLM analysis
 
 ### Files Modified:
+
 - `app/routes.ts` - Added checklist API route
 - `app/service/analysis-service.ts` - Added checklist analysis, save, and load functions
 - `app/routes/home.tsx` - Added checklist state and parallel analysis
 - `app/components/checklist-section.tsx` - Full UI implementation with tooltips
 
 ### Verification Results:
+
 - ✅ TypeScript compilation: Passed (`pnpm typecheck`)
 - ✅ Production build: Passed (`pnpm build`)
 - ✅ Dev server: Running
@@ -359,6 +399,7 @@ All 5 phases successfully implemented and verified:
 - ✅ Tooltip UI for unchecked items
 
 ### Usage:
+
 1. Enter blog post text in the editor
 2. Click "Analyze" button
 3. Both guidelines and checklist analyze in parallel

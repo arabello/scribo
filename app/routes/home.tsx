@@ -2,17 +2,9 @@ import * as React from "react";
 import type { Route } from "./+types/home";
 import SuggestionsSection from "~/components/suggestions-section";
 import TextEditorSection from "~/components/text-editor-section";
-import GuidelinesSection from "~/components/guidelines-section";
-import ChecklistSection from "~/components/checklist-section";
-import Toolbar from "~/components/toolbar";
-import type { AnalysisState } from "~/model/guideline";
-import type { ChecklistAnalysisState } from "~/model/checklist";
-import {
-  analyzeText,
-  loadAnalysis,
-  analyzeChecklist,
-  loadChecklistAnalysis,
-} from "~/service/analysis-service";
+import Guidelines from "~/components/guidelines/guidelines";
+import Checklist from "~/components/checklist/checklist";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -27,59 +19,18 @@ export function meta({}: Route.MetaArgs) {
 export default function Home(): React.JSX.Element {
   const [pageContent, setPageContent] = React.useState<string>("");
 
-  const [analysisState, setAnalysisState] = React.useState<AnalysisState>({
-    isAnalyzing: false,
-    result: null,
-    error: null,
-    selectedGuidelineId: null,
-  });
-
-  const [checklistState, setChecklistState] =
-    React.useState<ChecklistAnalysisState>({
-      isAnalyzing: false,
-      result: null,
-      error: null,
-    });
-
-  const handleAnalyze = async (): Promise<void> => {
-    if (!pageContent.trim()) {
-      return;
+  // Load content from localStorage on mount
+  React.useEffect(() => {
+    const savedContent = localStorage.getItem("blog-post-content");
+    if (savedContent) {
+      setPageContent(savedContent);
     }
+  }, []);
 
-    // Set both analyzing states
-    setAnalysisState((prev) => ({ ...prev, isAnalyzing: true, error: null }));
-    setChecklistState((prev) => ({ ...prev, isAnalyzing: true, error: null }));
-
-    try {
-      // Call both analyses in parallel
-      const [guidelinesResult, checklistResult] = await Promise.all([
-        analyzeText(pageContent),
-        analyzeChecklist(pageContent),
-      ]);
-
-      setAnalysisState((prev) => ({
-        ...prev,
-        result: guidelinesResult,
-        isAnalyzing: false,
-      }));
-      setChecklistState((prev) => ({
-        ...prev,
-        result: checklistResult,
-        isAnalyzing: false,
-      }));
-    } catch (error) {
-      setAnalysisState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error.message : "Analysis failed",
-        isAnalyzing: false,
-      }));
-      setChecklistState((prev) => ({
-        ...prev,
-        error: error instanceof Error ? error.message : "Analysis failed",
-        isAnalyzing: false,
-      }));
-    }
-  };
+  // Save content to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem("blog-post-content", pageContent);
+  }, [pageContent]);
 
   return (
     <div className="grid grid-cols-3 h-screen">
@@ -95,37 +46,42 @@ export default function Home(): React.JSX.Element {
         <TextEditorSection
           content={pageContent}
           onContentChange={setPageContent}
-          violations={analysisState.result?.violations || []}
-          selectedGuidelineId={analysisState.selectedGuidelineId}
+          violations={[]}
+          selectedGuidelineId={null}
           isLoading={false}
         />
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
-          <Toolbar
-            onAnalyze={handleAnalyze}
-            isAnalyzing={analysisState.isAnalyzing}
-            hasContent={!!pageContent}
-          />
-        </div>
       </div>
 
-      {/* Right column - 1 unit */}
+      {/* Right column - 1 unit with full-page tabs */}
       <div className="col-span-1 flex flex-col min-h-0">
-        <div className="flex-1 min-h-0">
-          <GuidelinesSection
-            isAnalyzing={analysisState.isAnalyzing}
-            violations={analysisState.result?.violations || []}
-            selectedGuidelineId={analysisState.selectedGuidelineId}
-            onSelectGuideline={(id: number | null) =>
-              setAnalysisState((prev) => ({ ...prev, selectedGuidelineId: id }))
-            }
-          />
-        </div>
-        <div className="flex-1 min-h-0">
-          <ChecklistSection
-            isAnalyzing={checklistState.isAnalyzing}
-            results={checklistState.result?.results || []}
-          />
-        </div>
+        <Tabs defaultValue="guidelines" className="flex flex-col h-full">
+          <div className="shrink-0 border-b border-l border-border px-4">
+            <TabsList className="h-12 w-full justify-start">
+              <TabsTrigger value="guidelines" className="flex-1">
+                Guidelines
+              </TabsTrigger>
+              <TabsTrigger value="checklist" className="flex-1">
+                Checklist
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent
+            value="guidelines"
+            className="flex-1 mt-0 min-h-0"
+            forceMount
+          >
+            <Guidelines content={pageContent} />
+          </TabsContent>
+
+          <TabsContent
+            value="checklist"
+            className="flex-1 mt-0 min-h-0"
+            forceMount
+          >
+            <Checklist content={pageContent} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

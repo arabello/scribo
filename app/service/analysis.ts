@@ -1,8 +1,13 @@
 import * as v from "valibot";
-import { AnalysisResultSchema, type AnalysisResult } from "~/model/guideline";
+import {
+  AnalysisResultSchema,
+  type AnalysisResult,
+  type Guideline,
+} from "~/model/guideline";
 import {
   ChecklistAnalysisResultSchema,
   type ChecklistAnalysisResult,
+  type ChecklistItem,
 } from "~/model/checklist";
 
 // Simple hash function for text
@@ -16,11 +21,14 @@ function simpleHash(text: string): string {
   return Math.abs(hash).toString(36);
 }
 
-export async function analyzeText(text: string): Promise<AnalysisResult> {
+export async function analyzeText(
+  text: string,
+  guidelines: Guideline[],
+): Promise<AnalysisResult> {
   const response = await fetch("/api/analyze/guidelines", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }), // Only send text, guidelines are on backend
+    body: JSON.stringify({ text, guidelines }),
   });
 
   if (!response.ok) {
@@ -104,11 +112,12 @@ export function clearAnalysis(): void {
 
 export async function analyzeChecklist(
   text: string,
+  checklistItems: ChecklistItem[],
 ): Promise<ChecklistAnalysisResult> {
   const response = await fetch("/api/analyze/checklist", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, checklistItems }),
   });
 
   if (!response.ok) {

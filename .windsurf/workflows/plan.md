@@ -22,7 +22,7 @@ If parameters are provided (e.g., a task file path), read them immediately and b
 ### Step 1: Context Gathering & Initial Analysis
 
 1. **Read all mentioned files immediately and FULLY**
-   - task files (e.g., `.windsurf/local/tasks/task.md`)
+   - task files (e.g., `.windsurf/tasks/task.md`)
    - Research documents
    - Related implementation plans
    - Any JSON/data files mentioned
@@ -113,7 +113,7 @@ If parameters are provided (e.g., a task file path), read them immediately and b
 
 ### Step 4: Detailed Plan Writing
 
-Write the plan to `.windsurf/local/plans/YYYY-MM-DD-task-description.md`
+Write the plan to `.windsurf/plans/YYYY-MM-DD-task-description.md`
 
 Use this template structure:
 
