@@ -10,11 +10,13 @@ import { encodeGuidelines, decodeGuidelines } from "~/lib/markdown-converter";
 interface GuidelinesProps {
   content: string;
   onAnalysisComplete?: (result: AnalysisResult) => void;
+  onSelectedGuidelineChange?: (id: number | null) => void;
 }
 
 export default function Guidelines({
   content,
   onAnalysisComplete,
+  onSelectedGuidelineChange,
 }: GuidelinesProps): React.JSX.Element {
   const {
     guidelines,
@@ -202,7 +204,10 @@ Tip: Cmd/Ctrl+Enter to save, Escape to cancel"
             guidelines={guidelines}
             violations={analysisResult?.violations || []}
             selectedGuidelineId={selectedGuidelineId}
-            onSelectGuideline={setSelectedGuidelineId}
+            onSelectGuideline={(id) => {
+              setSelectedGuidelineId(id);
+              onSelectedGuidelineChange?.(id);
+            }}
             onUpdateGuideline={updateGuideline}
           />
         )}

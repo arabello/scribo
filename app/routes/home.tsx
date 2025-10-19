@@ -5,6 +5,7 @@ import TextEditorSection from "~/components/text-editor-section";
 import Guidelines from "~/components/guidelines/guidelines";
 import Checklist from "~/components/checklist/checklist";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import type { AnalysisResult } from "~/model/guideline";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -18,6 +19,11 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home(): React.JSX.Element {
   const [pageContent, setPageContent] = React.useState<string>("");
+  const [analysisResult, setAnalysisResult] =
+    React.useState<AnalysisResult | null>(null);
+  const [selectedGuidelineId, setSelectedGuidelineId] = React.useState<
+    number | null
+  >(null);
 
   // Load content from localStorage on mount
   React.useEffect(() => {
@@ -31,6 +37,13 @@ export default function Home(): React.JSX.Element {
   React.useEffect(() => {
     localStorage.setItem("blog-post-content", pageContent);
   }, [pageContent]);
+
+  const handleAnalysisComplete = React.useCallback(
+    (result: AnalysisResult): void => {
+      setAnalysisResult(result);
+    },
+    [],
+  );
 
   return (
     <div className="grid grid-cols-9 h-screen">
@@ -46,8 +59,8 @@ export default function Home(): React.JSX.Element {
         <TextEditorSection
           content={pageContent}
           onContentChange={setPageContent}
-          violations={[]}
-          selectedGuidelineId={null}
+          violations={analysisResult?.violations || []}
+          selectedGuidelineId={selectedGuidelineId}
           isLoading={false}
         />
       </div>
@@ -71,7 +84,11 @@ export default function Home(): React.JSX.Element {
             className="flex-1 mt-0 min-h-0"
             forceMount
           >
-            <Guidelines content={pageContent} />
+            <Guidelines
+              content={pageContent}
+              onAnalysisComplete={handleAnalysisComplete}
+              onSelectedGuidelineChange={setSelectedGuidelineId}
+            />
           </TabsContent>
 
           <TabsContent

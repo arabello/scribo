@@ -1,7 +1,12 @@
 import * as React from "react";
 import type { ChecklistItem, ChecklistAnalysisResult } from "~/model/checklist";
 import { analyzeChecklist } from "~/service/analysis";
-import { saveChecklistItems, loadChecklistItems } from "./storage";
+import {
+  saveChecklistItems,
+  loadChecklistItems,
+  saveAnalysisResult,
+  loadAnalysisResult,
+} from "./storage";
 import { getNextId } from "~/lib/utils";
 import { encodeChecklist, decodeChecklist } from "~/lib/markdown-converter";
 
@@ -34,6 +39,7 @@ export function useChecklist(): UseChecklistReturn {
   // Load from localStorage on mount
   React.useEffect(() => {
     setItems(loadChecklistItems());
+    setAnalysisResult(loadAnalysisResult());
   }, []);
 
   // Save to localStorage whenever items change
@@ -42,6 +48,11 @@ export function useChecklist(): UseChecklistReturn {
       saveChecklistItems(items);
     }
   }, [items]);
+
+  // Save analysis result to localStorage whenever it changes
+  React.useEffect(() => {
+    saveAnalysisResult(analysisResult);
+  }, [analysisResult]);
 
   const addItem = React.useCallback((): void => {
     const newItem: ChecklistItem = {

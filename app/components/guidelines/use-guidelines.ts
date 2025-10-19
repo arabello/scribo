@@ -1,7 +1,12 @@
 import * as React from "react";
 import type { Guideline, AnalysisResult } from "~/model/guideline";
 import { analyzeText } from "~/service/analysis";
-import { saveGuidelines, loadGuidelines } from "./storage";
+import {
+  saveGuidelines,
+  loadGuidelines,
+  saveAnalysisResult,
+  loadAnalysisResult,
+} from "./storage";
 import { getNextId } from "~/lib/utils";
 import { encodeGuidelines, decodeGuidelines } from "~/lib/markdown-converter";
 
@@ -34,6 +39,7 @@ export function useGuidelines(): UseGuidelinesReturn {
   // Load from localStorage on mount
   React.useEffect(() => {
     setGuidelines(loadGuidelines());
+    setAnalysisResult(loadAnalysisResult());
   }, []);
 
   // Save to localStorage whenever guidelines change
@@ -42,6 +48,11 @@ export function useGuidelines(): UseGuidelinesReturn {
       saveGuidelines(guidelines);
     }
   }, [guidelines]);
+
+  // Save analysis result to localStorage whenever it changes
+  React.useEffect(() => {
+    saveAnalysisResult(analysisResult);
+  }, [analysisResult]);
 
   const addGuideline = React.useCallback((): void => {
     const newGuideline: Guideline = {
