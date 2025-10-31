@@ -82,6 +82,7 @@ Return your response as a JSON object with this structure:
 }
 
 IMPORTANT:
+- The provided text is in markdown format: consider formatting such as bold, underline, etc.
 - Include all checklist items in your response
 - Set checked to true only if the text clearly addresses the requirement
 - For unchecked items, provide a helpful reason explaining what's missing

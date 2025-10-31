@@ -79,6 +79,7 @@ Return your response as a JSON object with this structure:
 }
 
 IMPORTANT:
+- The provided text is in markdown format: consider formatting such as bold, underline, etc.
 - Use textVerbatim to highlight specific problematic text parts
 - A single guideline violation can reference multiple text parts
 - Omit textVerbatim entirely for violations that apply to the whole content (e.g., missing elements, overall structure issues)
